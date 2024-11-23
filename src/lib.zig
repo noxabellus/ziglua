@@ -34,6 +34,13 @@ extern "c" fn zig_registerAssertionHandler() void;
 /// This function is defined in luau.cpp and ensures Zig uses the correct free when compiling luau code
 extern "c" fn zig_luau_free(ptr: *anyopaque) void;
 
+/// This function is defined in luau_analysis.cpp and provides the luau-analyze CLI as a function
+extern "c" fn zig_luau_analysis(argc: i32, argv: [*]const [*:0]const u8) i32;
+
+pub fn luau_analysis(argv: []const [*:0]const u8) i32 {
+    return zig_luau_analysis(@intCast(argv.len), argv.ptr);
+}
+
 const Allocator = std.mem.Allocator;
 
 // Types

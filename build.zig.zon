@@ -33,9 +33,6 @@
             .hash = "1220ae2d84cfcc2a7aa670661491f21bbed102d335de18ce7d36866640fd9dfcc33a",
         },
 
-        .luau = .{
-            .url = "https://github.com/luau-lang/luau/archive/refs/tags/0.653.tar.gz",
-            .hash = "1220c76fb74b983b0ebfdd6b3a4aa8adf0c1ff69c9b6a9e9e05f9bc6a6c57a690e23",
-        },
+        .luau = .{ .path = "../../luau" },
     },
 }

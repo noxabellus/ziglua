@@ -11,10 +11,9 @@ pub fn configure(b: *Build, target: Build.ResolvedTarget, optimize: std.builtin.
         .version = std.SemanticVersion{ .major = 0, .minor = 653, .patch = 0 },
     });
 
-    lib.addIncludePath(upstream.path("Common/include"));
-    lib.addIncludePath(upstream.path("Compiler/include"));
-    lib.addIncludePath(upstream.path("Ast/include"));
-    lib.addIncludePath(upstream.path("VM/include"));
+    for (luau_header_directories) |file| {
+        lib.addIncludePath(upstream.path(file));
+    }
 
     const flags = [_][]const u8{
         "-DLUA_USE_LONGJMP=1",
@@ -33,6 +32,7 @@ pub fn configure(b: *Build, target: Build.ResolvedTarget, optimize: std.builtin.
         .flags = &flags,
     });
     lib.addCSourceFile(.{ .file = b.path("src/luau.cpp"), .flags = &flags });
+    lib.addCSourceFile(.{ .file = b.path("src/luau_analysis.cpp"), .flags = &flags });
     lib.linkLibCpp();
 
     lib.installHeader(upstream.path("VM/include/lua.h"), "lua.h");
@@ -43,7 +43,102 @@ pub fn configure(b: *Build, target: Build.ResolvedTarget, optimize: std.builtin.
     return lib;
 }
 
-const luau_source_files = [_][]const u8{
+const luau_header_directories = luau_vm_header_directories ++ luau_analysis_header_directories;
+const luau_source_files = luau_vm_source_files ++ luau_analysis_source_files;
+
+const luau_analysis_header_directories = [_][]const u8{
+    "Config/include",
+    "CLI",
+    "EqSat/include",
+    "Analysis/include",
+};
+
+const luau_analysis_source_files = [_][]const u8{
+    "Config/src/Config.cpp",
+    "Config/src/LinterConfig.cpp",
+
+    "CLI/Flags.cpp",
+    "CLI/FileUtils.cpp",
+    "CLI/Require.cpp",
+
+    "EqSat/src/Id.cpp",
+    "EqSat/src/UnionFind.cpp",
+
+    "Analysis/src/Anyification.cpp",
+    "Analysis/src/EmbeddedBuiltinDefinitions.cpp",
+    "Analysis/src/Quantify.cpp",
+    "Analysis/src/Type.cpp",
+    "Analysis/src/AnyTypeSummary.cpp",
+    "Analysis/src/EqSatSimplification.cpp",
+    "Analysis/src/Refinement.cpp",
+    "Analysis/src/TypedAllocator.cpp",
+    "Analysis/src/ApplyTypeFunction.cpp",
+    "Analysis/src/Error.cpp",
+    "Analysis/src/RequireTracer.cpp",
+    "Analysis/src/TypeFunction.cpp",
+    "Analysis/src/AstJsonEncoder.cpp",
+    "Analysis/src/FragmentAutocomplete.cpp",
+    "Analysis/src/Scope.cpp",
+    "Analysis/src/TypeFunctionReductionGuesser.cpp",
+    "Analysis/src/AstQuery.cpp",
+    "Analysis/src/Frontend.cpp",
+    "Analysis/src/Simplify.cpp",
+    "Analysis/src/TypeFunctionRuntimeBuilder.cpp",
+    "Analysis/src/AutocompleteCore.cpp",
+    "Analysis/src/Generalization.cpp",
+    "Analysis/src/Substitution.cpp",
+    "Analysis/src/TypeFunctionRuntime.cpp",
+    "Analysis/src/GlobalTypes.cpp",
+    "Analysis/src/Subtyping.cpp",
+    "Analysis/src/TypeInfer.cpp",
+    "Analysis/src/Autocomplete.cpp",
+    "Analysis/src/Instantiation2.cpp",
+    "Analysis/src/Symbol.cpp",
+    "Analysis/src/TypeOrPack.cpp",
+    "Analysis/src/BuiltinDefinitions.cpp",
+    "Analysis/src/Instantiation.cpp",
+    "Analysis/src/TableLiteralInference.cpp",
+    "Analysis/src/TypePack.cpp",
+    "Analysis/src/Clone.cpp",
+    "Analysis/src/IostreamHelpers.cpp",
+    "Analysis/src/ToDot.cpp",
+    "Analysis/src/TypePath.cpp",
+    "Analysis/src/Constraint.cpp",
+    "Analysis/src/JsonEmitter.cpp",
+    "Analysis/src/TopoSortStatements.cpp",
+    "Analysis/src/TypeUtils.cpp",
+    "Analysis/src/ConstraintGenerator.cpp",
+    "Analysis/src/Linter.cpp",
+    "Analysis/src/ToString.cpp",
+    "Analysis/src/Unifiable.cpp",
+    "Analysis/src/ConstraintSolver.cpp",
+    "Analysis/src/LValue.cpp",
+    "Analysis/src/Transpiler.cpp",
+    "Analysis/src/Unifier2.cpp",
+    "Analysis/src/DataFlowGraph.cpp",
+    "Analysis/src/Module.cpp",
+    "Analysis/src/TxnLog.cpp",
+    "Analysis/src/Unifier.cpp",
+    "Analysis/src/DcrLogger.cpp",
+    "Analysis/src/NonStrictTypeChecker.cpp",
+    "Analysis/src/TypeArena.cpp",
+    "Analysis/src/Def.cpp",
+    "Analysis/src/Normalize.cpp",
+    "Analysis/src/TypeAttach.cpp",
+    "Analysis/src/Differ.cpp",
+    "Analysis/src/OverloadResolution.cpp",
+    "Analysis/src/TypeChecker2.cpp",
+};
+
+const luau_vm_header_directories = [_][]const u8{
+    "Common/include",
+    "Compiler/include",
+    "Config/include",
+    "Ast/include",
+    "VM/include",
+};
+
+const luau_vm_source_files = [_][]const u8{
     "Compiler/src/BuiltinFolding.cpp",
     "Compiler/src/Builtins.cpp",
     "Compiler/src/BytecodeBuilder.cpp",

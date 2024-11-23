@@ -27,6 +27,12 @@ pub fn main() anyerror!void {
 
     // Load bytecode
     const src = @embedFile("./test.luau");
+
+    const args = try std.process.argsAlloc(allocator);
+    defer std.process.argsFree(allocator, args);
+
+    std.debug.assert(ziglua.luau_analysis(&[_][*:0]const u8{ args[0], "--formatter=plain", "--mode=strict", "./examples/test.luau" }) == 0);
+    
     const bc = try ziglua.compile(allocator, src, ziglua.CompileOptions{});
     defer allocator.free(bc);
 

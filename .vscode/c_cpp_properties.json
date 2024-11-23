@@ -1,0 +1,25 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**",
+                
+                "~/projects/luau/Common/include",
+                "~/projects/luau/CLI",
+                "~/projects/luau/Compiler/include",
+                "~/projects/luau/Config/include",
+                "~/projects/luau/Ast/include",
+                "~/projects/luau/VM/include",
+                
+                "~/projects/luau/Analysis/include"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c17",
+            "cppStandard": "gnu++17",
+            "intelliSenseMode": "linux-gcc-x64"
+        }
+    ],
+    "version": 4
+}
