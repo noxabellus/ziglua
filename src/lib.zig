@@ -34,12 +34,545 @@ extern "c" fn zig_registerAssertionHandler() void;
 /// This function is defined in luau.cpp and ensures Zig uses the correct free when compiling luau code
 extern "c" fn zig_luau_free(ptr: *anyopaque) void;
 
-/// This function is defined in luau_analysis.cpp and provides the luau-analyze CLI as a function
-extern "c" fn zig_luau_analysis(argc: i32, argv: [*]const [*:0]const u8) i32;
 
-pub fn luau_analysis(argv: []const [*:0]const u8) i32 {
-    return zig_luau_analysis(@intCast(argv.len), argv.ptr);
+pub fn LuauAnalysisContext (comptime Userstate: type) type {
+    return struct {
+        const Self = @This();
+
+        pub const Location = c.ZigLuauLocation;
+
+        pub const Mode = enum {
+            NonStrict,
+            Strict,
+            Definition,
+        };
+
+        pub const FlagName = enum {
+            LuauSimplificationComplexityLimit,
+            LuauTypeFamilyGraphReductionMaximumSteps,
+            LuauTypeFamilyApplicationCartesianProductLimit,
+            LuauTypeFamilyUseGuesserDepth,
+            LuauTypeFunctionSerdeIterationLimit,
+            LuauTypePathMaximumTraverseSteps,
+            LuauAnySummaryRecursionLimit,
+            LuauTypeCloneIterationLimit,
+            LuauSolverRecursionLimit,
+            LuauIndentTypeMismatchMaxTypeLength,
+            LuauSuggestionDistance,
+            LuauNormalizeCacheLimit,
+            LuauNormalizeIntersectionLimit,
+            LuauTarjanChildLimit,
+            LuauTarjanPreallocationSize,
+            DebugLuauVerboseTypeNames,
+            LuauTypeMaximumStringifierLength,
+            LuauTableTypeMaximumStringifierLength,
+            LuauTypeInferRecursionLimit,
+            LuauTypeInferPackLoopLimit,
+            LuauCheckRecursionLimit,
+            LuauVisitRecursionLimit,
+            LuauRecursionLimit,
+            LuauTypeLengthLimit,
+            LuauParseErrorLimit,
+            CodegenHeuristicsInstructionLimit,
+            CodegenHeuristicsBlockLimit,
+            CodegenHeuristicsBlockInstructionLimit,
+            LuauCodeGenBlockSize,
+            LuauCodeGenMaxTotalSize,
+            LuauCodeGenMinLinearBlockPath,
+            LuauCodeGenReuseSlotLimit,
+            LuauCodeGenReuseUdataTagLimit,
+            LuauCompileLoopUnrollThreshold,
+            LuauCompileLoopUnrollThresholdMaxBoost,
+            LuauCompileInlineThreshold,
+            LuauCompileInlineThresholdMaxBoost,
+            LuauCompileInlineDepth,
+            LuauRunCustomModuleChecks,
+            LuauCoroCheckStack,
+            LuauDebugInfoInvArgLeftovers,
+            LuauStackLimit,
+            StudioReportLuauAny2,
+            LuauDocumentationAtPosition,
+            AutocompleteRequirePathSuggestions2,
+            LuauAutocompleteRefactorsForIncrementalAutocomplete,
+            LuauTypestateBuiltins2,
+            LuauStringFormatArityFix,
+            LuauDontRefCountTypesInTypeFunctions,
+            LuauNewSolverVisitExprLvalues,
+            LuauNewSolverPrePopulateClasses,
+            LuauUserTypeFunExportedAndLocal,
+            LuauNewSolverPopulateTableLocations,
+            DebugLuauLogSolver,
+            DebugLuauLogSolverIncludeDependencies,
+            DebugLuauLogBindings,
+            LuauRemoveNotAnyHack,
+            DebugLuauEqSatSimplification,
+            LuauAllowNilAssignmentToIndexer,
+            LuauVectorDefinitions,
+            DebugLuauLogSimplification,
+            DebugLuauLogSimplificationToDot,
+            DebugLuauExtraEqSatSanityChecks,
+            LuauKnowsTheDataModel3,
+            LuauStoreCommentsForDefinitionFiles,
+            DebugLuauLogSolverToJson,
+            DebugLuauLogSolverToJsonFile,
+            DebugLuauForbidInternalTypes,
+            DebugLuauForceStrictMode,
+            DebugLuauForceNonStrictMode,
+            LuauStoreSolverTypeOnModule,
+            LintRedundantNativeAttribute,
+            LuauUserTypeFunNonstrict,
+            LuauCountSelfCallsNonstrict,
+            DebugLuauCheckNormalizeInvariant,
+            LuauNormalizationTracksCyclicPairsThroughInhabitance,
+            LuauIntersectNormalsNeedToTrackResourceLimits,
+            LuauFlagBasicIntersectFollows,
+            DebugLuauSubtypingCheckPathValidity,
+            LuauRetrySubtypingWithoutHiddenPack,
+            LuauSymbolEquality,
+            LuauSyntheticErrors,
+            DebugLuauToStringNoLexicalSort,
+            DebugLuauFreezeArena,
+            LuauTableKeysAreRValues,
+            DebugLuauLogTypeFamilies,
+            LuauUserDefinedTypeFunctionResetState,
+            LuauUserTypeFunFixRegister,
+            LuauUserTypeFunFixNoReadWrite,
+            LuauUserTypeFunFixMetatable,
+            DebugLuauMagicTypes,
+            DebugLuauFreezeDuringUnification,
+            LuauMetatableFollow,
+            LuauRequireCyclesDontAlwaysReturnAny,
+            LuauInstantiateInSubtyping,
+            LuauTransitiveSubtyping,
+            LuauFixIndexerSubtypingOrdering,
+            LuauUnifierRecursionOnRestart,
+            LuauSolver2,
+            LuauUserDefinedTypeFunctionsSyntax2,
+            LuauUserDefinedTypeFunParseExport,
+            LuauAllowFragmentParsing,
+            LuauPortableStringZeroCheck,
+            LuauAllowComplexTypesInGenericParams,
+            LuauErrorRecoveryForTableTypes,
+            DebugLuauTimeTracing,
+            DebugCodegenNoOpt,
+            DebugCodegenOptSize,
+            DebugCodegenSkipNumbering,
+            DebugCodegenChaosA64,
+            LuauVectorLibNativeCodegen,
+            LuauVectorLibNativeDot,
+            DebugLuauAbortingChecks,
+            LuauVectorBuiltins,
+            LuauCompileOptimizeRevArith,
+            LuauCompileVectorTypeInfo,
+            LuauMathMap,
+            LuauVectorMetatable,
+            DebugLuauForceAllNewSolverTests,
+        };
+
+        pub const LintName = enum {
+            Unknown,
+            UnknownGlobal,
+            DeprecatedGlobal,
+            GlobalUsedAsLocal,
+            LocalShadow,
+            SameLineStatement,
+            MultiLineStatement,
+            LocalUnused,
+            FunctionUnused,
+            ImportUnused,
+            BuiltinGlobalWrite,
+            PlaceholderRead,
+            UnreachableCode,
+            UnknownType,
+            ForRange,
+            UnbalancedAssignment,
+            ImplicitReturn,
+            DuplicateLocal,
+            FormatString,
+            TableLiteral,
+            UninitializedLocal,
+            DuplicateFunction,
+            DeprecatedApi,
+            TableOperations,
+            DuplicateCondition,
+            MisleadingAndOr,
+            CommentDirective,
+            IntegerParsing,
+            ComparisonPrecedence,
+            RedundantNativeAttribute,
+        };
+
+        pub const Config = struct {
+            inner: *c.ZigLuauConfig,
+
+            pub fn setMode(self: *Self, mode: Self.Mode) void {
+                self.inner.mode = @intFromEnum(mode);
+            }
+
+            pub fn getMode(self: *const Self) Self.Mode {
+                return @enumFromInt(self.inner.mode);
+            }
+
+            pub fn getAllowDeclarationSyntax(self: *const Self) bool {
+                return self.inner.allowDeclarationSyntax;
+            }
+
+            pub fn setAllowDeclarationSyntax(self: *Self, allow: bool) void {
+                self.inner.allowDeclarationSyntax = allow;
+            }
+
+            pub fn getCaptureComments(self: *const Self) bool {
+                return self.inner.captureComments;
+            }
+
+            pub fn setCaptureComments(self: *Self, capture: bool) void {
+                self.inner.captureComments = capture;
+            }
+
+            pub fn getLintEnabled(self: *const Self, comptime lintName: LintName) bool {
+                return @field(self.inner.lintEnabled, @tagName(lintName));
+            }
+
+            pub fn enableLint(self: *Self, comptime lintName: LintName) void {
+                @field(self.inner.lintEnabled, @tagName(lintName)) = true;
+            }
+
+            pub fn disableLint(self: *Self, comptime lintName: LintName) void {
+                @field(self.inner.lintEnabled, @tagName(lintName)) = false;
+            }
+
+            pub fn getLintFatal(self: *const Self, comptime lintName: LintName) bool {
+                return @field(self.inner.lintFatal, @tagName(lintName));
+            }
+
+            pub fn setLintFatal(self: *Self, comptime lintName: LintName, fatal: bool) void {
+                @field(self.inner.lintFatal, @tagName(lintName)) = fatal;
+            }
+
+            pub fn getLintErrorsEnabled(self: *const Self) bool {
+                return self.inner.lintErrors;
+            }
+
+            pub fn enableLinting(self: *Self) void {
+                self.inner.lintErrors = true;
+            }
+
+            pub fn disableLinting(self: *Self) void {
+                self.inner.lintErrors = false;
+            }
+            
+            pub fn getTypeErrorsEnabled(self: *const Self) bool {
+                return self.inner.typeErrors;
+            }
+
+            pub fn enableTypeErrors(self: *Self) void {
+                self.inner.typeErrors = true;
+            }
+
+            pub fn disableTypeErrors(self: *Self) void {
+                self.inner.typeErrors = false;
+            }
+
+            pub fn getGlobals(self: *const Self) []const [*:0]const u8 {
+                if (self.inner.globals) |globalsPtr| {
+                    const globals = std.mem.span(@as([*:null]const ?[*:0]const u8, @ptrCast(globalsPtr)));
+
+                    for (globals, 0..) |g, i| {
+                        if (g == null) {
+                            return @as([*]const [*:0]const u8, @ptrCast(globalsPtr))[0..i];
+                        }
+                    }
+                }
+
+                return &[0][*:0]const u8 {};
+            }
+
+            pub fn setGlobals(self: *Self, allocator: std.mem.Allocator, globals: []const []const u8) !void {
+                if (self.inner.globals) |globalsPtr| {
+                    try allocator.free(globalsPtr);
+                }
+
+                const newBuffer = try allocator.alloc([*:0]const u8, globals.len);
+
+                var i: usize = 0;
+                errdefer {
+                    for (0..i) |x| {
+                        allocator.free(newBuffer[x]);
+                    }
+                    allocator.free(newBuffer);
+                }
+
+                while (i < globals.len) : (i += 1) {
+                    const globalPtr = try allocator.dupeZ(u8, globals[i]);
+
+                    @as([*]const ?[*:0]const u8, @ptrCast(newBuffer))[i] = globalPtr;
+                }
+
+                self.inner.numGlobals = @intCast(newBuffer.len);
+                self.inner.globals = @ptrCast(newBuffer.ptr);
+            }
+        };
+
+        inner: c.ZigLuauAnalysisContext,
+
+        pub fn init(userstate: *Userstate) Self {
+            return Self {
+                .inner = c.zig_luau_create_analysis_context(userstate),
+            };
+        }
+
+        pub fn deinit(self: *Self, allocator: std.mem.Allocator) void {
+            if (self.inner.config.globals) |globalsPtr| {
+                try allocator.free(globalsPtr);
+            }
+        }
+
+        pub fn analyze(self: *Self, rootFiles: []const [*:0]const u8) i32 {
+            return c.zig_luau_analysis(&self.inner, @intCast(rootFiles.len), rootFiles.ptr);
+        }
+
+        pub fn getThreads(self: *Self) i32 {
+            return self.inner.threads;
+        }
+
+        pub fn setThreads(self: *Self, threads: i32) void {
+            self.inner.threads = threads;
+        }
+
+        pub fn setIntFlag(self: *Self, comptime flag: FlagName, value: ?i32) void {
+            const field = &@field(self.inner.flags, @tagName(flag));
+
+            if (value) |v| {
+                field.isSet = true;
+                field.value = v;
+            } else {
+                field.isSet = false;
+                field.value = 0;
+            }
+        }
+
+        pub fn getIntFlag(self: *const Self, comptime flag: FlagName) ?i32 {
+            return @field(self.inner.flags, @tagName(flag));
+        }
+
+        pub fn setBoolFlag(self: *Self, comptime flag: FlagName, value: ?bool) void {
+            const flagValue = switch (value) {
+                null => c.ZLA_DEFAULT,
+                false => c.ZLA_OFF,
+                true => c.ZLA_ON,
+            };
+
+            @field(self.inner.flags, @tagName(flag)) = flagValue;
+        }
+
+        pub fn getBoolFlag(self: *const Self, comptime flag: FlagName) ?bool {
+            const value = @field(self.inner.flags, @tagName(flag));
+            
+            return switch (value) {
+                c.ZLA_DEFAULT => null,
+                c.ZLA_OFF => false,
+                c.ZLA_ON => true,
+            };
+        }
+
+        pub fn setMode(self: *Self, mode: Self.Mode) void {
+            self.inner.config.mode = @intFromEnum(mode);
+        }
+
+        pub fn getMode(self: *const Self) Self.Mode {
+            return @enumFromInt(self.inner.config.mode);
+        }
+
+        pub fn getAllowDeclarationSyntax(self: *const Self) bool {
+            return (Config{.inner = &self.inner.config}).getAllowDeclarationSyntax();
+        }
+
+        pub fn setAllowDeclarationSyntax(self: *Self, allow: bool) void {
+            return (Config{.inner = &self.inner.config}).setAllowDeclarationSyntax(allow);
+        }
+
+        pub fn getCaptureComments(self: *const Self) bool {
+            return (Config{.inner = &self.inner.config}).getCaptureComments();
+        }
+
+        pub fn setCaptureComments(self: *Self, capture: bool) void {
+            return (Config{.inner = &self.inner.config}).setCaptureComments(capture);
+        }
+
+        pub fn getLintEnabled(self: *const Self, comptime lintName: LintName) bool {
+            return (Config{.inner = &self.inner.config}).getLintEnabled(lintName);
+        }
+
+        pub fn enableLint(self: *Self, comptime lintName: LintName) void {
+            return (Config{.inner = &self.inner.config}).enableLint(lintName);
+        }
+
+        pub fn disableLint(self: *Self, comptime lintName: LintName) void {
+            return (Config{.inner = &self.inner.config}).disableLint(lintName);
+        }
+
+        pub fn getLintFatal(self: *const Self, comptime lintName: LintName) bool {
+            return (Config{.inner = &self.inner.config}).getLintFatal(lintName);
+        }
+
+        pub fn setLintFatal(self: *Self, comptime lintName: LintName, fatal: bool) void {
+            return (Config{.inner = &self.inner.config}).setLintFatal(lintName, fatal);
+        }
+
+        pub fn getLintErrorsEnabled(self: *const Self) bool {
+            return (Config{.inner = &self.inner.config}).getLintErrorsEnabled();
+        }
+
+        pub fn enableLinting(self: *Self) void {
+            return (Config{.inner = &self.inner.config}).enableLinting();
+        }
+
+        pub fn disableLinting(self: *Self) void {
+            return (Config{.inner = &self.inner.config}).disableLinting();
+        }
+        
+        pub fn getTypeErrorsEnabled(self: *const Self) bool {
+            return (Config{.inner = &self.inner.config}).getTypeErrorsEnabled();
+        }
+
+        pub fn enableTypeErrors(self: *Self) void {
+            return (Config{.inner = &self.inner.config}).enableTypeErrors();
+        }
+
+        pub fn disableTypeErrors(self: *Self) void {
+            return (Config{.inner = &self.inner.config}).disableTypeErrors();
+        }
+
+        pub fn getGlobals(self: *const Self) []const [*:0]const u8 {
+            return (Config{.inner = &self.inner.config}).getGlobals();
+        }
+
+        pub fn setGlobals(self: *Self, allocator: std.mem.Allocator, globals: []const []const u8) !void {
+            return (Config{.inner = &self.inner.config}).setGlobals(allocator, globals);
+        }
+
+        pub const ReportFn = fn (userstate: *Userstate, moduleName: []const u8, loc: Location, type: []const u8, message: []const u8) void;
+        pub const AnnotateFn = fn (userstate: *Userstate, moduleName: []const u8, annotatedSource: []const u8) void;
+        pub const CacheManagerFn = fn (userstate: *Userstate, path: []const u8) bool;
+        pub const GetRequireSourceTextFn = fn (userstate: *Userstate, path: []const u8) ?[:0]const u8;
+        pub const ConfigResolverFn = fn (userstate: *Userstate, config: Config) void;
+        pub const JsonLogFn = fn (userstate: *Userstate, moduleName: []const u8, log: []const u8) void;
+
+        pub const ExternReportFn = c.ZigLuauExternReportFn;
+        pub const ExternAnnotateFn = c.ZigLuauExternAnnotateFn;
+        pub const ExternCacheManagerFn = c.ZigLuauExternCacheManagerFn;
+        pub const ExternGetRequireSourceTextFn = c.ZigLuauExternGetRequireSourceTextFn;
+        pub const ExternConfigResolverFn = c.ZigLuauExternConfigResolverFn;
+        pub const ExternJsonLogFn = c.ZigLuauExternJsonLogFn;
+
+        pub fn wrapReportFn (comptime reportFn: ReportFn) ExternReportFn {
+            return struct {
+                pub fn wrapper(userstate: ?*anyopaque, moduleName: [*c]const u8, loc: Location, ty: [*c]const u8, msg: [*c]const u8) callconv(.C) void {
+                    reportFn(@alignCast(@ptrCast(userstate)), std.mem.span(moduleName), loc, std.mem.span(ty), std.mem.span(msg));
+                }
+            }.wrapper;
+        }
+
+        pub fn wrapAnnotateFn (comptime annotateFn: AnnotateFn) ExternAnnotateFn {
+            return struct {
+                pub fn wrapper(userstate: ?*anyopaque, moduleName: [*c]const u8, annotatedSource: [*c]const u8) callconv(.C) void {
+                    annotateFn(@alignCast(@ptrCast(userstate)), std.mem.span(moduleName), std.mem.span(annotatedSource));
+                }
+            }.wrapper;
+        }
+
+        pub fn wrapCacheManagerFn (comptime cacheManagerFn: CacheManagerFn) ExternCacheManagerFn {
+            return struct {
+                pub fn wrapper(userstate: ?*anyopaque, path: [*c]const u8) callconv(.C) bool {
+                    return cacheManagerFn(@alignCast(@ptrCast(userstate)), std.mem.span(path));
+                }
+            }.wrapper;
+        }
+
+        pub fn wrapGetRequireSourceTextFn (comptime getRequireSourceTextFn: GetRequireSourceTextFn) ExternGetRequireSourceTextFn {
+            return struct {
+                pub fn wrapper(userstate: ?*anyopaque, path: [*c]const u8) callconv(.C) ?[*:0]const u8 {
+                    const result = getRequireSourceTextFn(@alignCast(@ptrCast(userstate)), std.mem.span(path));
+                    return if (result) |res| res.ptr else null;
+                }
+            }.wrapper;
+        }
+
+        pub fn wrapConfigResolverFn (comptime configResolverFn: ConfigResolverFn) ExternConfigResolverFn {
+            return struct {
+                pub fn wrapper(userstate: ?*anyopaque, cfg: *c.ZigLuauConfig) callconv(.C) void {
+                    configResolverFn(@alignCast(@ptrCast(userstate)), Config{.inner = cfg});
+                }
+            }.wrapper;
+        }
+
+        pub fn wrapJsonLogFn (comptime jsonLogFn: JsonLogFn) ExternJsonLogFn {
+            return struct {
+                pub fn wrapper(userstate: ?*anyopaque, moduleName: [*c]const u8, log: [*c]const u8) callconv(.C) void {
+                    jsonLogFn(@alignCast(@ptrCast(userstate)), std.mem.span(moduleName), std.mem.span(log));
+                }
+            }.wrapper;
+        }
+
+        pub fn getReportFn(self: *Self) ExternReportFn {
+            return self.inner.reportFn;
+        }
+
+        pub fn getAnnotateFn(self: *Self) ExternAnnotateFn {
+            return self.inner.annotateFn;
+        }
+
+        pub fn getCacheManagerFn(self: *Self) ExternCacheManagerFn {
+            return self.inner.cacheManagerFn;
+        }
+
+        pub fn getGetRequireSourceTextFn(self: *Self) ExternGetRequireSourceTextFn {
+            return self.inner.getRequireSourceTextFn;
+        }
+
+        pub fn getConfigResolverFn(self: *Self) ExternConfigResolverFn {
+            return self.inner.configResolverFn;
+        }
+
+        pub fn getJsonLogFn(self: *Self) ExternJsonLogFn {
+            return self.inner.jsonLogFn;
+        }
+
+        pub fn setReportFn(self: *Self, reportFn: ExternReportFn) void {
+            self.inner.reportFn = reportFn;
+        }
+
+        pub fn setAnnotateFn(self: *Self, annotateFn: ExternAnnotateFn) void {
+            self.inner.annotateFn = annotateFn;
+        }
+
+        pub fn setCacheManagerFn(self: *Self, cacheManagerFn: ExternCacheManagerFn) void {
+            self.inner.cacheManagerFn = cacheManagerFn;
+        }
+
+        pub fn setGetRequireSourceTextFn(self: *Self, getRequireSourceTextFn: ExternGetRequireSourceTextFn) void {
+            self.inner.getRequireSourceTextFn = getRequireSourceTextFn;
+        }
+
+        pub fn setConfigResolverFn(self: *Self, configResolverFn: ExternConfigResolverFn) void {
+            self.inner.configResolverFn = configResolverFn;
+        }
+
+        pub fn setJsonLogFn(self: *Self, jsonLogFn: ExternJsonLogFn) void {
+            self.inner.jsonLogFn = jsonLogFn;
+        }
+
+        pub fn getUserstate(self: *Self) *Userstate {
+            return @ptrCast(self.inner.userstate);
+        }
+
+        pub fn setUserstate(self: *Self, userstate: *Userstate) void {
+            self.inner.userstate = @alignCast(@ptrCast(userstate));
+        }
+    };
 }
+
+
 
 const Allocator = std.mem.Allocator;
 

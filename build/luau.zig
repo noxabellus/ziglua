@@ -39,6 +39,7 @@ pub fn configure(b: *Build, target: Build.ResolvedTarget, optimize: std.builtin.
     lib.installHeader(upstream.path("VM/include/lualib.h"), "lualib.h");
     lib.installHeader(upstream.path("VM/include/luaconf.h"), "luaconf.h");
     lib.installHeader(upstream.path("Compiler/include/luacode.h"), "luacode.h");
+    lib.installHeader(b.path("src/luau_analysis.h"), "luau_analysis.h");
 
     return lib;
 }
