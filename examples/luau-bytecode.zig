@@ -29,9 +29,6 @@ pub fn main() anyerror!void {
     // Load bytecode
     const src: [:0]const u8 = @embedFile("./test.luau");
 
-    const args = try std.process.argsAlloc(allocator);
-    defer std.process.argsFree(allocator, args);
-
     const State = struct {
         allocator: std.mem.Allocator,
     };
@@ -45,6 +42,7 @@ pub fn main() anyerror!void {
     var context = Context.init(&state);
 
     context.setMode(.Strict);
+    context.setThreadCount(1);
 
     context.setReportFn(Context.wrapReportFn(struct {
         pub fn fun (_: *State, moduleName: []const u8, loc: Context.Location, ty: []const u8, msg: []const u8) void {

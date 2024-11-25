@@ -9,5 +9,5 @@ function ispositive(x : number) : string
 end
 
 local result : string
-result = ispositive "foo"
+result = ispositive(1)
 print("result is positive:", result)

@@ -331,12 +331,12 @@ pub fn LuauAnalysisContext (comptime Userstate: type) type {
             return c.zig_luau_analysis(&self.inner, @intCast(rootFiles.len), rootFiles.ptr);
         }
 
-        pub fn getThreads(self: *Self) i32 {
-            return self.inner.threads;
+        pub fn getThreadCount(self: *Self) i32 {
+            return self.inner.threadCount;
         }
 
-        pub fn setThreads(self: *Self, threads: i32) void {
-            self.inner.threads = threads;
+        pub fn setThreadCount(self: *Self, threadCount: i32) void {
+            self.inner.threadCount = threadCount;
         }
 
         pub fn setIntFlag(self: *Self, comptime flag: FlagName, value: ?i32) void {
