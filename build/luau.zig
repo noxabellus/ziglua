@@ -49,7 +49,6 @@ const luau_source_files = luau_vm_source_files ++ luau_analysis_source_files;
 
 const luau_analysis_header_directories = [_][]const u8{
     "Config/include",
-    "CLI",
     "EqSat/include",
     "Analysis/include",
 };
@@ -57,10 +56,6 @@ const luau_analysis_header_directories = [_][]const u8{
 const luau_analysis_source_files = [_][]const u8{
     "Config/src/Config.cpp",
     "Config/src/LinterConfig.cpp",
-
-    "CLI/Flags.cpp",
-    "CLI/FileUtils.cpp",
-    "CLI/Require.cpp",
 
     "EqSat/src/Id.cpp",
     "EqSat/src/UnionFind.cpp",

@@ -8,8 +8,6 @@
 #include "Luau/Transpiler.h"
 #include "Luau/ExperimentalFlags.h"
 
-#include "Flags.h"
-
 extern "C" {
     #include "luau_analysis.h"
 };
